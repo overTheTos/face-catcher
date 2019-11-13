@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>Jquery Webcam Face Detection</title>
+    <script src="js/jquery-3.4.1.min.js"></script>
+    <script src="js/webcam.min.js"></script>
+    <style>
+        .webcam-container {
+            position: relative;
+            width: 500px;
+            height: auto;
+            margin: 20px auto;
+            padding: 5px;
+            border: 1px dotted rgb(66, 64, 64);
+            box-shadow: 0 5px 5px rgb(129, 27, 27);
+            border-radius: 3%;
+            float: left;
+            display: inline;
+        }
+
+        .picture-container {
+            position: relative;
+            width: 500px;
+            height: auto;
+            margin: 20px auto;
+            padding: 10px;
+            border: 1px dotted rgb(66, 64, 64);
+            box-shadow: 0 5px 5px rgb(129, 27, 27);
+            border-radius: 3%;
+            float: left;
+            display: inline;
+        }
+
+        .picture {
+            display: block;
+            width: 100%;
+            height: auto;
+        }
+
+        .face {
+            position: absolute;
+            border: 3px solid rgb(248, 245, 56);
+            border-radius: 5%;
+        }
+
+        .status-detected {
+            height: 30px;
+            display: block;
+            background: rgb(30, 196, 30);
+            color: white;
+            display: none;
+            font-weight: bold;
+            padding: 5px;
+        }
+
+        .status-not-detected {
+            height: 30px;
+            display: block;
+            background: rgb(196, 30, 38);
+            color: white;
+            display: none;
+            font-weight: bold;
+            padding: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1 class="text-center">Capture webcam image with php and jquery - ItSolutionStuff.com</h1>
+        <div class="status-detected"></div>
+        <div class="status-not-detected"></div>
+        <form method="POST" action="#">
+
+            <div class="webcam-container">
+                <div id="camera-area"></div>
+                <br />
+                <input type=button value="Take Snapshot" onClick="take_snapshot()">
+            </div>
+
+            <div class="picture-container">
+                <img id="picture" class="picture" src="#" />
+                <input type="button" id="face-detect" value="Detect" />
+            </div>
+
+        </form>
+
+    </div>
+
+    <!-- Configure a few settings and attach camera -->
+    <script language="JavaScript">
+        /* global $ */
+        $(function () {
+            "use strict";
+
+            Webcam.set({
+                width: 490,
+                height: 390,
+                image_format: 'jpeg',
+                jpeg_quality: 90
+            });
+
+            Webcam.attach('#camera-area');
+
+            $('#face-detect').click(function (e) {
+                e.preventDefault();
+
+                $('.face').remove();
+
+                $('#picture').faceDetection({
+                    complete: function (faces) {
+                        if (faces.length == 0) {
+                            $(".status-detected").hide();
+                            $(".status-not-detected").show();
+                            $(".status-not-detected").html("No face detected.");
+                        } else {
+                            $(".status-detected").show();
+                            $(".status-not-detected").hide();
+                            $(".status-detected").html("Ok! Face detection complete!.");
+                            for (var i = 0; i < faces.length; i++) {
+                                $('<div>', {
+                                    'class': 'face',
+                                    'css': {
+                                        'position': 'absolute',
+                                        'left': faces[i].x * faces[i].scaleX + 'px',
+                                        'top': faces[i].y * faces[i].scaleY + 'px',
+                                        'width': faces[i].width * faces[i].scaleX + 'px',
+                                        'height': faces[i].height * faces[i].scaleY + 'px'
+                                    }
+                                })
+                                    .insertAfter(this);
+                            }
+                        }
+                    },
+                    error: function (code, message) {
+                        alert('Error: ' + message);
+                    }
+                });
+            });
+        });
+
+        function take_snapshot() {
+            Webcam.snap(function (data_uri) {
+                document.getElementById('picture').src = data_uri;
+            });
+        }
+    </script>
+    <script src="js/jquery.facedetection.js"></script>
+</body>
+
+</html>
